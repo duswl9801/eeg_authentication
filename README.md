@@ -1,6 +1,8 @@
+# eeg_authentication
+
 1. server/members/create/ **(POST)**
 
-   회원가입.
+   회원가입
 
    > - request (JSON string 형식)
    >
