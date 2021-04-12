@@ -1,6 +1,6 @@
 # custom file
-./media/*
-./app/static/*
+media/*
+app/static/*
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/git,pycharm,jupyternotebooks,linux,macos,python
