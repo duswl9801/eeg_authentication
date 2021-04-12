@@ -89,9 +89,9 @@
 
    
 
-4. server/authenticate/ **(POST)**
+4. server/authenticate/make_model/ **(POST)**
 
-   EEG 데이터를 보내고 인증합니다.
+   EEG 데이터를 받아서 모델을 만듭니다.
 
    >- request
    >
@@ -104,12 +104,57 @@
    >
    >
    >
-   >- response (현재는 랜덤하게 성공 및 실패)
+   >- response
    >
    >```
    >{
-   >    "detail": "인증 실패"
+   >    "detail": "저장완료."
    >}
    >```
 
    
+   
+5. server/authenticate/check_user/ **(POST)**
+
+   EEG 데이터를 받아서 해당 유저가 맞는지 검사합니다.
+
+   > - request
+   >
+   > ```
+   > {
+   > 	"token": e4c0d0daaf2cc4ee2190a033957c1aa8c9eca9a5,
+   > 	"EEG": (FILE)
+   > }
+   > ```
+   >
+   > 
+   >
+   > 
+   >
+   > - response 
+   >
+   >   - 인증 성공
+   >
+   >   ```
+   >   {
+   >       "전체 Test": 227,
+   >       "맞은 Test": 207,
+   >       "맞은 비율": 0.9118942731277533,
+   >       "detail": "인증 성공"
+   >   }
+   >   ```
+   >
+   >   
+   >
+   >   - 인증 실패
+   >
+   >   ```
+   >   {
+   >       "전체 Test": 227,
+   >       "맞은 Test": 116,
+   >       "맞은 비율": 0.5110132158590308,
+   >       "detail": "인증 실패"
+   >   }
+   >   ```
+   >
+   >   
