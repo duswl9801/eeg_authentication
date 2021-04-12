@@ -8,8 +8,6 @@ from tensorflow import keras
 
 from authenticate.serializers import EEGSerializer
 
-from scipy import signal
-
 
 # 처음 가입했을 때 사용
 class MakeEEGModelAPIView(APIView):
@@ -25,7 +23,7 @@ class MakeEEGModelAPIView(APIView):
             train_data, train_label = make_train_dataset(eeg)
             input_shape = train_data.shape[-2:]
             model = make_model(input_shape)
-            model.fit(train_data, train_label, batch_size=20, epochs=1, verbose=0)
+            model.fit(train_data, train_label, batch_size=20, epochs=20, verbose=0)
 
             save_file = f'../media/{user.username}.h5'
             model.save(save_file)
@@ -53,10 +51,11 @@ class CheckUserAPIView(APIView):
             saved_model = user.model
             model = keras.models.load_model(str(saved_model))
 
-            eeg = request.data['EEG']  # 받아온 결과
+            eeg = request.data['EEG']  # 받아온 eeg
             eeg, _ = make_data(eeg)
 
             test_predict = model.predict(eeg)
+            print(test_predict)
             right_cnt = sum(test_predict >= 0.5)[0]
 
             test_case = len(eeg)

@@ -1,3 +1,4 @@
+import joblib
 import scipy.io
 import numpy as np
 import tensorflow as tf
@@ -15,6 +16,7 @@ pub_data = pub_data.reshape(-1, 1)
 
 def make_public_dataset(scaler):
     global pub_data, public_sub_size, public_sub_cnt
+
     public_data = scaler.transform(pub_data)
     public_data = public_data.reshape(public_sub_cnt * public_sub_size, DATA_SIZE, 2)
 
@@ -26,17 +28,18 @@ def make_public_dataset(scaler):
 
 
 # 데이터를 받아서 train_data로 만들고 label과 함께 return
-def make_data(eeg_data):
+def make_data(eeg_data, data_type='test'):
     data = scipy.io.loadmat(eeg_data)['data']
     cut_size = len(data) // DATA_SIZE * DATA_SIZE  # 나누어 떨어지도록 만듦
     data = data[0:cut_size, :]
     sub_size = data.shape[0] // 480
-    data = data.reshape(-1, 1)
 
-    # 스케일링
     sd_scaler = StandardScaler()
-    sd_scaler.fit(data)
-    data = sd_scaler.transform(data)
+    # 스케일링
+    if data_type == 'train':
+        data = data.reshape(-1, 1)
+        sd_scaler.fit(data)
+        data = sd_scaler.transform(data)
 
     # 최종 reshape data
     data = data.reshape(sub_size, DATA_SIZE, 2)
@@ -46,7 +49,8 @@ def make_data(eeg_data):
 
 
 def make_train_dataset(eeg_data):
-    train_data, scaler = make_data(eeg_data)
+    train_data, scaler = make_data(eeg_data, data_type='train')
+
     # train_data마다 public data의 scale 다르게 설정
     public_data_each = make_public_dataset(scaler)
 

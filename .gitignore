@@ -1,7 +1,7 @@
 # custom file
 media/*
 app/static/*
-
+app/db.sqlite3
 
 # Created by https://www.toptal.com/developers/gitignore/api/git,pycharm,jupyternotebooks,linux,macos,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=git,pycharm,jupyternotebooks,linux,macos,python
