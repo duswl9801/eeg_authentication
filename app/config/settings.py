@@ -132,6 +132,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # MEDIA_ROOT = 파일이 저장될 경로
 # MEDIA_URL = 웹 URL을 통해서 파일에 접근하는 경로

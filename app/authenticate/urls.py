@@ -1,7 +1,8 @@
 from django.urls import path
 
-from authenticate.apis import CheckUserAPIView
+from authenticate.apis import CheckUserAPIView, MakeEEGModelAPIView
 
 urlpatterns = [
-    path('', CheckUserAPIView.as_view()),
+    path('make_model/', MakeEEGModelAPIView.as_view()),
+    path('check_user/', CheckUserAPIView.as_view()),
 ]
