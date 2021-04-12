@@ -1,41 +1,14 @@
-import random
-
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .EEG_CNN import *
-from config.settings import ROOT_DIR
+from tensorflow import keras
 
 from authenticate.serializers import EEGSerializer
 
 from scipy import signal
-
-
-def fir_filter(data, lowcut, highcut, fs, order=29):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    if low == 0 and high == 1:
-        return data
-    elif low == 0 and high != 1:
-        coeff = signal.firwin(order, highcut / nyq)
-    elif low != 0 and high == 1:
-        coeff = signal.firwin(order, lowcut / nyq, pass_zero=False)
-    elif low != 0 and high != 1:
-        coeff = signal.firwin(order, [low, high], pass_zero=False)
-    output = signal.lfilter(coeff, 1.0, data)
-    return output
-
-
-# def EEG_CNN_Network(eeg_data):
-#     train_data, train_label = make_train(eeg_data)
-#     input_shape = train_data.shape[-2:]
-#     model = make_model(input_shape)
-#     res = model.fit(train_data, train_label, batch_size=20, epochs=20, verbose=0)
-#
-#     return res
 
 
 # 처음 가입했을 때 사용
@@ -49,7 +22,7 @@ class MakeEEGModelAPIView(APIView):
             user = Token.objects.get(key=token).user
             eeg = request.data['EEG']
 
-            train_data, train_label = make_train(eeg)
+            train_data, train_label = make_train_dataset(eeg)
             input_shape = train_data.shape[-2:]
             model = make_model(input_shape)
             model.fit(train_data, train_label, batch_size=20, epochs=1, verbose=0)
@@ -60,7 +33,7 @@ class MakeEEGModelAPIView(APIView):
             user.save()
 
             return Response({
-                'detail': 'Success.'
+                'detail': '저장완료.'
             })
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -71,29 +44,35 @@ class CheckUserAPIView(APIView):
     parser_classes = (MultiPartParser,)
 
     def post(self, request):
-        # 재학습
-
-        # 결과 return
-
         serializer = EEGSerializer(data=request.data)
         if serializer.is_valid():
             token = request.data['token']
             user = Token.objects.get(key=token).user
-            model = user.model  # 저장된 모델
+
+            # 저장된 model load
+            saved_model = user.model
+            model = keras.models.load_model(str(saved_model))
+
             eeg = request.data['EEG']  # 받아온 결과
+            eeg, _ = make_data(eeg)
+
+            test_predict = model.predict(eeg)
+            right_cnt = sum(test_predict >= 0.5)[0]
+
+            test_case = len(eeg)
+            result = right_cnt / test_case
 
             # 모델에 EEG 데이터 retraining
 
-            result = random.choice([True, False])
-
-            if result:
-                data = {
-                    'detail': '인증 성공',
-                }
+            data = {
+                '전체 Test': test_case,
+                '맞은 Test': right_cnt,
+                '맞은 비율': result,
+            }
+            if result >= 0.85:
+                data['detail'] = '인증 성공'
             else:
-                data = {
-                    'detail': '인증 실패',
-                }
+                data['detail'] = '인증 실패'
             return Response(data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
