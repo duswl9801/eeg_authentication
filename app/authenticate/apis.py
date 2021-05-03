@@ -23,7 +23,7 @@ class MakeEEGModelAPIView(APIView):
             train_data, train_label = make_train_dataset(eeg)
             input_shape = train_data.shape[-2:]
             model = make_model(input_shape)
-            model.fit(train_data, train_label, batch_size=20, epochs=20, verbose=0)
+            model.fit(train_data, train_label, batch_size=20, epochs=10, verbose=0)
 
             save_file = f'../media/{user.username}.h5'
             model.save(save_file)
@@ -55,7 +55,6 @@ class CheckUserAPIView(APIView):
             eeg, _ = make_data(eeg)
 
             test_predict = model.predict(eeg)
-            print(test_predict)
             right_cnt = sum(test_predict >= 0.5)[0]
 
             test_case = len(eeg)
